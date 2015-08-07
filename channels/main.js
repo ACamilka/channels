@@ -1,4 +1,4 @@
-var channelsApp = angular.module('channelsApp', ['ui.bootstrap']);
+var channelsApp = angular.module('channelsApp', ['ui.bootstrap', 'ngSanitize']);
 
 channelsApp.controller('channelsController', function($scope, $http, $modal){
     // Список каналов
@@ -133,7 +133,7 @@ channelsApp.controller('channelsController', function($scope, $http, $modal){
                 params: function(){
                     return {
                         title: 'Статистика',
-                        content: 'Количество сообщений: '+ entries.length + '. \nКоличество авторов: ' + authorsCount
+                        content: 'Количество сообщений: '+ entries.length + '. <br>Количество авторов: ' + authorsCount
                     }
                 }
             }

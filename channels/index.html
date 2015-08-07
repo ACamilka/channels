@@ -5,6 +5,7 @@
     <title>RSS каналы</title>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.2/angular.min.js"></script>
     <script src="http://angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.13.0.min.js"></script>
+    <script src="http://code.angularjs.org/1.2.20/angular-sanitize.min.js"></script>
     <script src="https://rawgithub.com/highslide-software/highcharts.com/master/js/adapters/standalone-framework.src.js"></script>
     <script src="http://code.highcharts.com/highcharts.js"></script>
     <script src="http://code.highcharts.com/highcharts-more.js"></script>
@@ -96,7 +97,7 @@
             <button type="button" class="close" data-dismiss="modal" ng-click="ok()">&times;</button>
             <h4 class="modal-title" ng-bind="params.title"></h4>
         </div>
-        <div class="modal-body" ng-bind="params.content">
+        <div class="modal-body" ng-bind-html="params.content">
         </div>
         <div class="modal-footer">
             <button class="btn btn-default" ng-click="ok()">ОК</button>
