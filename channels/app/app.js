@@ -1,0 +1,1 @@
+var channelsApp = angular.module('channelsApp', ['ui.bootstrap', 'ngSanitize']);
