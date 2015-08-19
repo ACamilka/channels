@@ -4,11 +4,16 @@ channelsApp.controller('channelsController', function($scope, $http, $modal){
     $scope.channels = [];
     // Список сообщений
     $scope.messages = [];
-    $scope.pages;
-    // Количество сообщений отображаемых на странице
-    $scope.messagesPerPage = 14;
-    $scope.startPage = 0;
-    $scope.currentPage = $scope.startPage;
+    // Индекс текущего канала
+    $scope.currentChannelIndex = null;
+    // Текущая страница
+    $scope.currentPage = 0;
+    // Общее количество элементов
+    $scope.totalItems = 0;
+    // Количество элементов на странице
+    $scope.itemsPerPage = 10;
+    // Количество отображаемых номеров страниц
+    $scope.maxPageSize = 10;
     /*
     * Добавление/редактирование канала
     */
@@ -54,18 +59,18 @@ channelsApp.controller('channelsController', function($scope, $http, $modal){
             $scope.channels.push(channel);
         } else {
             $scope.channels[index] = channel;
-            $scope.currentChannel = channel;
-            $scope.loadPage(0);
         }
+        $scope.currentChannelIndex = index || $scope.channels.length -1;
+        $scope.loadMessages($scope.currentChannelIndex);
     };
 
     /*
     * Удаление канала
     */
     $scope.deleteChannel = function(index) {
-        var deletedChannel = $scope.channels.splice(index, 1);
-        if (deletedChannel.indexOf($scope.currentChannel) != -1) {
-            $scope.loadData([]);
+        $scope.channels.splice(index, 1);
+        if ($scope.currentChannelIndex == index) {
+            $scope.loadItems();
         }
     };
 
@@ -73,15 +78,17 @@ channelsApp.controller('channelsController', function($scope, $http, $modal){
     * Просмотр списка сообщений канала
     */
     $scope.loadMessages = function(index){
-        $scope.currentChannel = $scope.channels[index];
-        $scope.loadPage();
+        var channel = $scope.channels[index];
+        $scope.currentChannelIndex = index;
+        $scope.currentPage = 1;
+        $scope.loadItems();
     };
 
     /*
     * Просмотр сообщения
     */
     $scope.viewMessage = function(index) {
-        if (angular.isUndefined($scope.currentChannel)) {
+        if (angular.isUndefined($scope.currentChannelIndex)) {
             alert('Канал не выбран');
         }
 
@@ -102,22 +109,9 @@ channelsApp.controller('channelsController', function($scope, $http, $modal){
             }
         });
         modalInstance.result.then(function () {
-            $scope.loadData($scope.currentChannel.entries);
+            $scope.loadItems();
         });
 
-    };
-
-    /*
-    * Загрузка страници с сообщениями
-    */
-    $scope.loadPage = function(pageNumber) {
-        if (angular.isUndefined(pageNumber)) {
-            pageNumber = $scope.startPage;
-        }
-        $scope.currentPage = pageNumber;
-        $scope.loadData($scope.currentChannel.entries);
-        angular.element(document.querySelectorAll(".pagination>li.active")).removeClass('active');
-        angular.element(document.querySelectorAll("[data-page-id='{}']".replace('{}', pageNumber))).addClass('active');
     };
 
     /*
@@ -174,27 +168,9 @@ channelsApp.controller('channelsController', function($scope, $http, $modal){
             }
         });
     };
-
-    $scope.$watch('userFilter', function(newVal){
-        var data = $scope.currentChannel ? $scope.currentChannel.entries : [];
-        $scope.loadData(data);
-    });
-
-    $scope.loadData = function(data) {
-        if ($scope.userFilter) {
-            data = data.filter(function(i){ return !i.isReaded });
-        }
-        // Вычисление количества страниц
-        $scope.pages = new Array(Math.ceil(data.length /$scope.messagesPerPage) | 0);
-        // Получаение среза сообщений
-        $scope.messages = $scope.getSliceData(data);
-    };
-
-    $scope.getSliceData = function(data) {
-        var start = $scope.currentPage * $scope.messagesPerPage;
-        return data.slice(start, start + $scope.messagesPerPage);
-    };
-
+    /*
+    * Получение списка уникальных авторов
+    */
     $scope.getUniqAuthors = function(entries){
         var uniqAuthors = [];
         for(var i=0; i<entries.length; i++){
@@ -204,4 +180,23 @@ channelsApp.controller('channelsController', function($scope, $http, $modal){
         }
         return uniqAuthors
     };
+    /*
+    * Загрузка сообщений текущей страниы
+    */
+    $scope.loadItems = function() {
+        if (angular.isUndefined($scope.currentChannelIndex)) return;
+        var currentChannel = $scope.channels[$scope.currentChannelIndex],
+            start = ($scope.currentPage - 1) * $scope.itemsPerPage,
+            end = start + $scope.itemsPerPage;
+        var data = currentChannel ? currentChannel.entries: [];
+        //Фильтрация прочитанных/непрочитанных сообщений
+        if ($scope.userFilter) {
+            data = data.filter(function(i){ return !i.isReaded });
+        }
+        $scope.totalItems = data.length;
+        $scope.messages = data.slice(start, end);
+    };
+    $scope.$watch('userFilter', function(){
+        $scope.loadItems();
+    });
 });

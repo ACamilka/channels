@@ -68,13 +68,11 @@
                     </li>
                 </ul>
             </div>
-            <div class="panel-footer">
-                <ul class="pagination" ng-show="pages.length">
-                    <li class="{{ $index == 0 ? 'active' : '' }}" ng-repeat="p in pages track by $index"
-                        ng-click="loadPage($index)" data-page-id="{{ $index }}">
-                        <a href="#">{{ $index+1 }}</a>
-                    </li>
-                </ul>
+            <div class="panel-footer text-center" ng-show="currentPage">
+                <pagination direction-links="true" total-items="totalItems"
+                            ng-model="currentPage" items-per-page="itemsPerPage" max-size="maxPageSize"
+                            previous-text="Пред." next-text="След." ng-change="loadItems()">
+                </pagination>
             </div>
         </div>
     </div>
